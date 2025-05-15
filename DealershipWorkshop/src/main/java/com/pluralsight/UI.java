@@ -153,7 +153,11 @@ public class UI {
         System.out.println("\nFinding vehicles by type...\n");
         if (this.dealership == null){
             System.out.println("Dealership data is not available.");
+            return;
         }
+
+        List<Vehicle> allVehicles = this.dealership.getAllVehicles();
+        displayVehicles(allVehicles);
     }
 
     private void processGetAllVehicles() {
