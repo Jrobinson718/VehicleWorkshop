@@ -39,16 +39,7 @@ public class DealershipFileManager  {
                 String[] vehicleDetails = line.split("\\|");
                 if (vehicleDetails.length == 8) {
                     try {
-                        int vin = Integer.parseInt(vehicleDetails[0]);
-                        int year = Integer.parseInt(vehicleDetails[1]);
-                        String make = vehicleDetails[2];
-                        String model = vehicleDetails[3];
-                        String vehicleType = vehicleDetails[4];
-                        String color = vehicleDetails[5];
-                        int odometer = Integer.parseInt(vehicleDetails[6]);
-                        double price = Double.parseDouble(vehicleDetails[7]);
-
-                        Vehicle vehicle = new Vehicle(vin, year, make, model, vehicleType, color, odometer, price);
+                        Vehicle vehicle = getVehicle(vehicleDetails);
                         dealership.addVehicle(vehicle);
                     }catch (NumberFormatException e) {
                         System.out.println("Error parsing vehicle data: " + line + "." +
@@ -64,6 +55,19 @@ public class DealershipFileManager  {
             return null;
         }
         return dealership;
+    }
+
+    private Vehicle getVehicle(String[] vehicleDetails) {
+        int vin = Integer.parseInt(vehicleDetails[0]);
+        int year = Integer.parseInt(vehicleDetails[1]);
+        String make = vehicleDetails[2];
+        String model = vehicleDetails[3];
+        String vehicleType = vehicleDetails[4];
+        String color = vehicleDetails[5];
+        int odometer = Integer.parseInt(vehicleDetails[6]);
+        double price = Double.parseDouble(vehicleDetails[7]);
+
+        return new Vehicle(vin, year, make, model, vehicleType, color, odometer, price);
     }
 
     public void saveDealership(Dealership dealership) {
