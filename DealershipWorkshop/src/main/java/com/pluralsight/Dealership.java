@@ -48,39 +48,119 @@ public class Dealership {
     //   === Methods ===
 
     public List<Vehicle> getVehiclesByPrice(double min, double max) {
-        return new ArrayList<>();
+        List<Vehicle> matchingVehicles = new ArrayList<>();
+        if (this.inventory == null || this.inventory.isEmpty()) {
+            return matchingVehicles;
+        }
+        for (Vehicle vehicle : this.inventory) {
+            if (vehicle.getPrice() >= min && vehicle.getPrice() <= max) {
+                matchingVehicles.add(vehicle);
+            }
+        }
+        return matchingVehicles;
     }
 
     public List<Vehicle> getVehiclesByMakeModel(String make, String model) {
-        return new ArrayList<>();
+        List<Vehicle> matchingVehicles = new ArrayList<>();
+        if (this.inventory == null || this.inventory.isEmpty()) {
+            return matchingVehicles;
+        }
+
+        boolean makeProvided = make != null && !make.trim().isEmpty();
+        boolean modelProvided = model != null && !model.trim().isEmpty();
+
+        for (Vehicle vehicle : this.inventory) {
+            boolean makeMatch = !makeProvided || vehicle.getMake().equalsIgnoreCase(make.trim());
+            boolean modelMatch = !modelProvided || vehicle.getModel().equalsIgnoreCase(model.trim());
+
+            if (makeProvided && modelProvided) {
+                if (makeMatch && modelMatch) {
+                    matchingVehicles.add(vehicle);
+                }
+            } else if (makeProvided) {
+                if (makeMatch) {
+                    matchingVehicles.add(vehicle);
+                }
+            } else if (modelProvided) {
+                if (modelMatch) {
+                    matchingVehicles.add(vehicle);
+                }
+            }
+        }
+        return matchingVehicles;
     }
 
     public List<Vehicle> getVehiclesByYear(int min, int max) {
-        return new ArrayList<>();
+        List<Vehicle> matchingVehicles = new ArrayList<>();
+        if (this.inventory == null || this.inventory.isEmpty()) {
+            return matchingVehicles;
+        }
+        for (Vehicle vehicle : this.inventory) {
+            if (vehicle.getYear() >= min && vehicle.getYear() <= max) {
+                matchingVehicles.add(vehicle);
+            }
+        }
+        return matchingVehicles;
     }
 
     public List<Vehicle> getVehiclesByColor(String color) {
-        return new ArrayList<>();
+        List<Vehicle> matchingVehicles = new ArrayList<>();
+        if (this.inventory == null || this.inventory.isEmpty()) {
+            return matchingVehicles;
+        }
+        String searchColor = color.trim();
+        for (Vehicle vehicle : this.inventory) {
+            if (vehicle.getColor().equalsIgnoreCase(searchColor)) {
+                matchingVehicles.add(vehicle);
+            }
+        }
+        return matchingVehicles;
     }
 
     public List<Vehicle> getVehiclesByMileage(int min, int max) {
-        return new ArrayList<>();
+        List<Vehicle> matchingVehicles = new ArrayList<>();
+        if (this.inventory == null || this.inventory.isEmpty()) {
+            return matchingVehicles;
+        }
+        for (Vehicle vehicle : this.inventory) {
+            if (vehicle.getOdometer() >= min && vehicle.getOdometer() <= max) {
+                matchingVehicles.add(vehicle);
+            }
+        }
+        return matchingVehicles;
     }
 
     public List<Vehicle> getVehiclesByType(String vehicleType) {
-        return new ArrayList<>();
+        List<Vehicle> matchingVehicles = new ArrayList<>();
+        if (this.inventory == null || this.inventory.isEmpty()) {
+            return matchingVehicles;
+        }
+        String searchType = vehicleType.trim();
+        for (Vehicle vehicle : this.inventory) {
+            if (vehicle.getVehicleType().equalsIgnoreCase(searchType)) {
+                matchingVehicles.add(vehicle);
+            }
+        }
+        return matchingVehicles;
     }
 
     public List<Vehicle> getAllVehicles() {
+        if (this.inventory == null) {
+            return new ArrayList<>();
+        }
         return new ArrayList<>(this.inventory);
     }
 
     public void addVehicle(Vehicle vehicle) {
+        if (this.inventory == null) {
+            this.inventory = new ArrayList<>();
+        }
         this.inventory.add(vehicle);
     }
 
     public void removeVehicle(Vehicle vehicle) {
-        this.inventory.remove(vehicle);
+        if (this.inventory != null && vehicle != null) {
+            this.inventory.remove(vehicle);
+        }
     }
-
 }
