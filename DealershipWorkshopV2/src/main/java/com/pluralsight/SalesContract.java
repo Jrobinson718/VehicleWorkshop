@@ -5,15 +5,38 @@ public class SalesContract extends Contract{
     private double recordingFee = 100.0;
     private double processingFee;
     private boolean financeVehicle;
-    
 
-    public SalesContract(String date, String customerName, String customerEmail, boolean vehicleSold, double salesTax, double recordingFee, double processingFee, boolean financeVehicle) {
-        super(date, customerName, customerEmail, true);
-        this.salesTax = salesTax;
-        this.recordingFee = recordingFee;
-        this.processingFee = processingFee;
+    // Constants
+    private static final double SALES_TAX_RATE = 0.05;
+    private static final double RECORDING_FEE = 100.0;
+    private static final double LOW_PRICE_PROCESSING_FEE = 295.0;
+    private static final double HIGH_PRICE_PROCESSING_FEE = 495.0;
+    private static final double PRICE_THRESHOLD = 10000.0;
+
+    // Finance rates
+    private static final double HIGH_PRICE_INTEREST_RATE = 0.0425;
+    private static final double LOW_PRICE_INTEREST_RATE = 0.0525;
+    private static final int HIGH_PRICE_LOAN_LENGTH = 48;
+    private static final int LOW_PRICE_LOAN_LENGTH = 24;
+
+
+    public SalesContract(String date, String customerName, String customerEmail, Vehicle vehicle, boolean financeVehicle) {
+        super(date, customerName, customerEmail, true, vehicle);
         this.financeVehicle = financeVehicle;
-        calculateProcessingFee();
+        this.recordingFee = RECORDING_FEE;
+        calculateFees();
+    }
+
+    private void calculateFees() {
+        double vehiclePrice = getVehicle().getPrice();
+
+        this.salesTax = vehiclePrice * SALES_TAX_RATE;
+
+        if (vehiclePrice < PRICE_THRESHOLD) {
+            this.processingFee = LOW_PRICE_PROCESSING_FEE;
+        }else {
+            this.processingFee = HIGH_PRICE_PROCESSING_FEE;
+        }
     }
 
     public double getSalesTax() {
@@ -22,16 +45,6 @@ public class SalesContract extends Contract{
 
     public double getRecordingFee() {
         return recordingFee = recordingFee;
-    }
-
-    private void calculateProcessingFee() {
-        double price = vehicle.getPrice();
-
-        if (price < 10000) {
-            this.processingFee = 295;
-        }else {
-            this.processingFee = 495;
-        }
     }
 
     public double getProcessingFee() {
@@ -48,5 +61,35 @@ public class SalesContract extends Contract{
 
     public void setFinanceVehicle(boolean financeVehicle) {
         this.financeVehicle = financeVehicle;
+    }
+
+    @Override
+    public double getTotalPrice() {
+        return getVehicle().getPrice() + salesTax + recordingFee + processingFee;
+    }
+
+    @Override
+    public double getMonthlyPayment() {
+        if (!financeVehicle) {
+            return 0.0;
+        }
+
+        double vehiclePrice = getVehicle().getPrice();
+        double totalPrice = getTotalPrice();
+        double interestRate;
+        int loanMonths;
+
+        if (vehiclePrice >= PRICE_THRESHOLD) {
+            interestRate = HIGH_PRICE_INTEREST_RATE;
+            loanMonths = HIGH_PRICE_LOAN_LENGTH;
+        }else {
+            interestRate = LOW_PRICE_INTEREST_RATE;
+            loanMonths = LOW_PRICE_LOAN_LENGTH;
+        }
+
+        double monthlyRate = interestRate / 12;
+        double monthlyPayment = (totalPrice * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -loanMonths));
+
+        return monthlyPayment;
     }
 }
