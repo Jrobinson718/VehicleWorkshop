@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-public class DealershipFileManager  {
+public class DealershipFileManager {
     //   === Initializes the Inventory csv to the fileName variable
     private static final String fileName = "inventory.csv";
 
