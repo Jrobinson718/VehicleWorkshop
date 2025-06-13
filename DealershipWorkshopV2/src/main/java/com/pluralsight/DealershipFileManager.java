@@ -1,17 +1,15 @@
 package com.pluralsight;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 
 public class DealershipFileManager {
-    //   === Initializes the Inventory csv to the fileName variable
-    private static final String fileName = "inventory.csv";
+    //   === Initializes the Inventory csv to the fileName variable ===
+    private static final String dataFolder = "data/";
+    private static final String fileName = dataFolder + "inventory.csv";
 
     public DealershipFileManager() {
-
+        new File(dataFolder).mkdirs();
     }
 
     //   === Methods ===
@@ -77,7 +75,7 @@ public class DealershipFileManager {
 
         List<Vehicle> vehicles = dealership.getAllVehicles();
 
-        try(PrintWriter writer = new PrintWriter("inventory.csv")) {
+        try(PrintWriter writer = new PrintWriter(fileName)) {
 
             writer.printf("%s|%s|%s", dealership.getName(), dealership.getAddress(), dealership.getPhone());
             writer.println();

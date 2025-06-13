@@ -9,10 +9,12 @@ public class UI {
     private Dealership dealership;
     private Console console;
     private DealershipFileManager fileManager;
+    private ContractFileManager contractFileManager;
 
     public UI() {
         this.console = new Console();
         this.fileManager = new DealershipFileManager();
+        this.contractFileManager = new ContractFileManager();
     }
 
     //   === Methods ===
@@ -53,7 +55,8 @@ public class UI {
                 "\n7) List ALL vehicles" +
                 "\n8) Add a vehicle" +
                 "\n9) Remove a vehicle" +
-                "\n99) Exit");
+                "\n10) Sell/Lease a vehicle" +
+                "\n0) Exit");
     }
 
     // Main display method for user interactions
@@ -105,7 +108,10 @@ public class UI {
                 case "9":
                     processRemoveVehicle();
                     break;
-                case "99":
+                case "10":
+                    processSellLeaseVehicle();
+                    break;
+                case "0":
                     System.out.println("Thank you for using the Dealership Application! Goodbye. :)");
                     keepRunning = false;
                     break;
@@ -314,4 +320,111 @@ public class UI {
         }
     }
 
+    private void processSellLeaseVehicle() {
+        System.out.println("\nSell/Lease a vehicle...\n");
+
+        if (this.dealership == null) {
+            System.out.println("Dealership data is not available.");
+            return;
+        }
+
+        try {
+            int vin = console.promptForInt("Enter VIN of vehicle to sell/lease: ");
+
+            Vehicle selectedVehicle = null;
+            for (Vehicle v : dealership.getAllVehicles()) {
+                if (v.getVin() == vin) {
+                    selectedVehicle = v;
+                    break;
+                }
+            }
+
+            if (selectedVehicle == null) {
+                System.out.println("Vehicle with VIN " + vin + " not found.");
+                return;
+            }
+
+            System.out.println("Selected Vehicle:");
+            System.out.println(selectedVehicle.toString());
+
+            String customerName = console.promptForString("Customer name: ");
+            String customerEmail = console.promptForString("Customer email: ");
+
+            String date = java.time.LocalDate.now().toString();
+
+            String contractType = console.promptForString("\nIs this a Sale or a Lease?\n" +
+                    "Enter 'S' for Sale 'L' for lease: ");
+
+            if (contractType.toLowerCase().startsWith("s")) {
+                processSale(date, customerName, customerEmail, selectedVehicle);
+            } else if (contractType.toLowerCase().startsWith("l")) {
+                processLease(date, customerName, customerEmail, selectedVehicle);
+            }else {
+                System.out.println("Invalid option. Please enter 'S' for Sale or 'L' for Lease.");
+                return;
+            }
+
+            dealership.removeVehicle(selectedVehicle);
+            System.out.println("\nVehicle removed from inventory");
+        }catch (Exception e) {
+            System.out.println("An error occurred while processing the sale/lease: " + e.getMessage());
+        }
+    }
+
+    private void processSale(String date, String customerName, String customerEmail, Vehicle vehicle) {
+        try {
+            String financeChoice = console.promptForString("Do you want to finance this vehicle? (Y/N): ");
+            boolean finance = financeChoice.toLowerCase().startsWith("y");
+
+            SalesContract salesContract = new SalesContract(date, customerName, customerEmail, vehicle, finance);
+
+            System.out.println("\n=== SALES CONTRACT SUMMARY ===");
+            System.out.printf("Vehicle: %d %s %s\n", vehicle.getYear(), vehicle.getMake(), vehicle.getModel());
+            System.out.printf("Customer: %s (%s)\n", customerName, customerEmail);
+            System.out.printf("Vehicle Price: $%.2f\n", vehicle.getPrice());
+            System.out.printf("Sales Tax: $%.2f\n", salesContract.getSalesTax());
+            System.out.printf("Recording Fee: $%.2f\n", salesContract.getRecordingFee());
+            System.out.printf("Processing Fee: $%.2f\n", salesContract.getProcessingFee());
+            System.out.printf("Total Price: $%.2f\n", salesContract.getTotalPrice());
+            System.out.printf("Finance: %s\n", finance ? "YES" : "NO");
+
+            if (finance) {
+                System.out.printf("Monthly Payment: $%.2f\n", salesContract.getMonthlyPayment());
+            }
+            System.out.println("==============================");
+
+            contractFileManager.saveContract(salesContract);
+
+        }catch (Exception e) {
+            System.out.println("Error processing sale: " + e.getMessage());
+        }
+    }
+
+    private void processLease(String date, String customerName, String customerEmail, Vehicle vehicle) {
+        try {
+            int currentYear = java.time.Year.now().getValue();
+
+            if (currentYear - vehicle.getYear() > 3) {
+                System.out.println("ERROR: Cannot lease a vehicle over 3 years old");
+                return;
+            }
+
+            LeaseContract leaseContract = new LeaseContract(date, customerName, customerEmail, vehicle);
+
+            System.out.println("\n=== LEASE CONTRACT SUMMARY ===");
+            System.out.printf("Vehicle: %d %s %s\n", vehicle.getYear(), vehicle.getMake(), vehicle.getModel());
+            System.out.printf("Customer: %s (%s)\n", customerName, customerEmail);
+            System.out.printf("Vehicle Price: $%.2f\n", vehicle.getPrice());
+            System.out.printf("Expected Ending Value: $%.2f\n", leaseContract.getExpectedEndingValue());
+            System.out.printf("Lease Fee: $%.2f\n", leaseContract.getLeaseFee());
+            System.out.printf("Total Lease Cost: $%.2f\n", leaseContract.getTotalPrice());
+            System.out.printf("Monthly Payment: $%.2f\n", leaseContract.getMonthlyPayment());
+            System.out.println("==============================");
+
+            contractFileManager.saveContract(leaseContract);
+
+        }catch (Exception e) {
+            System.out.println("Error processing lease: " + e.getMessage());
+        }
+    }
 }
